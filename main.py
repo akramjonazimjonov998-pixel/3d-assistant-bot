@@ -284,21 +284,16 @@ await message.answer(
     reply_markup=keyboard
 )
 ```
-
 # =========================
-
 # MAIN
-
 # =========================
 
 async def main():
 
-```
-logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
-await dp.start_polling(bot)
-```
+    await dp.start_polling(bot)
 
-if **name** == "**main**":
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
