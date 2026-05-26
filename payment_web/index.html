@@ -1,78 +1,221 @@
 <!DOCTYPE html>
-<html lang="uz">
-
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta charset="UTF-8">
+<title>3D Assistant AI</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<style>
 
-    <title>3D Assistant AI</title>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
 
-    <link rel="stylesheet"
-          href="style.css">
+body{
+    background:#0f0f0f;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
 
+.card{
+    width:100%;
+    max-width:420px;
+    background:#1a1a1a;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 0 30px rgba(0,255,255,0.2);
+}
+
+.logo{
+    font-size:28px;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.language-buttons{
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+.language-buttons button{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:12px;
+    background:#2a2a2a;
+    color:white;
+    cursor:pointer;
+}
+
+.subtitle{
+    text-align:center;
+    color:#aaa;
+    margin-bottom:30px;
+}
+
+.plan{
+    background:#111;
+    border:1px solid #333;
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.plan h2{
+    margin-bottom:15px;
+}
+
+.price{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:10px;
+    color:#00ffff;
+}
+
+.features{
+    color:#bbb;
+    line-height:1.8;
+    margin-bottom:20px;
+}
+
+.pay-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:15px;
+    background:#00ffff;
+    color:black;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+</style>
 </head>
 
 <body>
 
-    <div class="container">
+<div class="card">
 
-        <div class="logo">
+<div class="logo">
+🔥 3D ASSISTANT AI
+</div>
 
-            🔥
+<div class="language-buttons">
 
-        </div>
+<button onclick="setLanguage('uz')">
+🇺🇿 Uzbek
+</button>
 
-        <h1>3D Assistant AI</h1>
+<button onclick="setLanguage('ru')">
+🇷🇺 Русский
+</button>
 
-        <p class="subtitle">
+<button onclick="setLanguage('en')">
+🇬🇧 English
+</button>
 
-            Premium obunani faollashtiring
+</div>
 
-        </p>
+<div class="subtitle" id="subtitle">
+Premium obunani faollashtiring
+</div>
 
+<div class="plan">
 
-        <div class="card">
+<h2 id="plan1">
+1 Oylik Obuna
+</h2>
 
-            <h2>💎 1 Oylik Obuna</h2>
+<div class="price">
+34.999 so'm
+</div>
 
-            <div class="price">
+<div class="features" id="features">
+✔ Premium AI access<br>
+✔ Texture generator<br>
+✔ Render feedback<br>
+✔ 24/7 support
+</div>
 
-                34.999 so'm
+<button class="pay-btn" id="paybtn1">
+💳 To'lov Qilish
+</button>
 
-            </div>
+</div>
 
-            <button>
+<div class="plan">
 
-                Obuna Bo'lish
+<h2 id="plan3">
+3 Oylik Obuna
+</h2>
 
-            </button>
+<div class="price">
+95.000 so'm
+</div>
 
-        </div>
+<div class="features">
+✔ Premium AI access<br>
+✔ Texture generator<br>
+✔ Render feedback<br>
+✔ 24/7 support
+</div>
 
+<button class="pay-btn" id="paybtn2">
+💳 To'lov Qilish
+</button>
 
-        <div class="card premium">
+</div>
 
-            <h2>🔥 3 Oylik Obuna</h2>
+</div>
 
-            <div class="price">
+<script>
 
-                95.000 so'm
+function setLanguage(lang){
 
-            </div>
+    const data = {
 
-            <button>
+        uz:{
+            subtitle:"Premium obunani faollashtiring",
+            plan1:"1 Oylik Obuna",
+            plan3:"3 Oylik Obuna",
+            button:"💳 To'lov Qilish"
+        },
 
-                Premium Olish
+        ru:{
+            subtitle:"Активируйте премиум подписку",
+            plan1:"Подписка на 1 месяц",
+            plan3:"Подписка на 3 месяца",
+            button:"💳 Оплатить"
+        },
 
-            </button>
+        en:{
+            subtitle:"Activate premium subscription",
+            plan1:"1 Month Subscription",
+            plan3:"3 Month Subscription",
+            button:"💳 Pay Now"
+        }
+    };
 
-        </div>
+    document.getElementById("subtitle").innerText = data[lang].subtitle;
+    document.getElementById("plan1").innerText = data[lang].plan1;
+    document.getElementById("plan3").innerText = data[lang].plan3;
 
-    </div>
+    document.getElementById("paybtn1").innerText = data[lang].button;
+    document.getElementById("paybtn2").innerText = data[lang].button;
+}
+
+</script>
 
 </body>
-
 </html>
