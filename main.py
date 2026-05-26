@@ -1,33 +1,144 @@
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
-from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties
-
+from aiogram.types import (
+Message,
+ReplyKeyboardMarkup,
+KeyboardButton,
+InlineKeyboardMarkup,
+InlineKeyboardButton,
+WebAppInfo
+)
+from aiogram.filters import CommandStart
 import asyncio
 import logging
 import os
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-bot = Bot(
-    token=BOT_TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-)
-
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
-
-# =========================
-# LANGUAGES
-# =========================
 
 user_languages = {}
 
-texts = {
+# =========================
 
-    "uz": {
+# LANGUAGE KEYBOARD
 
-        "welcome":
-"""🔥 <b>3D ASSISTANT AI</b>
+# =========================
+
+language_keyboard = ReplyKeyboardMarkup(
+keyboard=[
+[
+KeyboardButton(text="🇺🇿 Uzbek"),
+KeyboardButton(text="🇷🇺 Русский"),
+KeyboardButton(text="🇬🇧 English")
+]
+],
+resize_keyboard=True
+)
+
+# =========================
+
+# MENUS
+
+# =========================
+
+menus = {
+
+```
+"uz": ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🔎 Model Izlash"),
+            KeyboardButton(text="📸 Render Feedback")
+        ],
+        [
+            KeyboardButton(text="🧠 Model Feedback"),
+            KeyboardButton(text="🎨 Texture Yaratish")
+        ],
+        [
+            KeyboardButton(text="📊 Statistika"),
+            KeyboardButton(text="💳 To'lov")
+        ]
+    ],
+    resize_keyboard=True
+),
+
+"ru": ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🔎 Поиск Моделей"),
+            KeyboardButton(text="📸 Анализ Рендера")
+        ],
+        [
+            KeyboardButton(text="🧠 Feedback Модели"),
+            KeyboardButton(text="🎨 Создать Текстуру")
+        ],
+        [
+            KeyboardButton(text="📊 Статистика"),
+            KeyboardButton(text="💳 Оплата")
+        ]
+    ],
+    resize_keyboard=True
+),
+
+"en": ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🔎 Find Models"),
+            KeyboardButton(text="📸 Render Feedback")
+        ],
+        [
+            KeyboardButton(text="🧠 Model Feedback"),
+            KeyboardButton(text="🎨 Create Texture")
+        ],
+        [
+            KeyboardButton(text="📊 Statistics"),
+            KeyboardButton(text="💳 Payment")
+        ]
+    ],
+    resize_keyboard=True
+)
+```
+
+}
+
+# =========================
+
+# START
+
+# =========================
+
+@dp.message(CommandStart())
+async def start_handler(message: Message):
+
+```
+await message.answer(
+    "🌍 Tilni tanlang / Выберите язык / Choose language",
+    reply_markup=language_keyboard
+)
+```
+
+# =========================
+
+# LANGUAGE SELECT
+
+# =========================
+
+@dp.message(F.text.in_(["🇺🇿 Uzbek", "🇷🇺 Русский", "🇬🇧 English"]))
+async def language_handler(message: Message):
+
+```
+user_id = message.from_user.id
+
+if message.text == "🇺🇿 Uzbek":
+
+    user_languages[user_id] = "uz"
+
+    await message.answer(
+        """
+```
+
+🔥 3D ASSISTANT AI
 
 Yordamida:
 
@@ -36,68 +147,44 @@ Yordamida:
 • Texture yarating
 • Professional feedback oling
 
-👇 Kerakli bo'limni tanlang""",
+👇 Kerakli bo'limni tanlang
+""",
+reply_markup=menus["uz"]
+)
 
-        "payment_text":
-"""💳 <b>OBUNA REJALARI</b>
+```
+elif message.text == "🇷🇺 Русский":
 
-💎 Oddiy To'lov
-━━━━━━━━━━━━━━
+    user_languages[user_id] = "ru"
 
-1 Oy — 34.999 so'm
-3 Oy — 95.000 so'm
+    await message.answer(
+        """
+```
 
-👇 To'lov qilish uchun tugmani bosing""",
-
-        "payment_button": "💳 To'lov Qilish",
-
-        "model_search": "🔎 Model Izlash",
-        "render_feedback": "📸 Render Feedback",
-        "model_feedback": "🧠 Model Feedback",
-        "texture": "🎨 Texture Yaratish",
-        "stats": "📊 Statistika",
-        "payment": "💳 To'lov"
-    },
-
-    "ru": {
-
-        "welcome":
-"""🔥 <b>3D ASSISTANT AI</b>
+🔥 3D ASSISTANT AI
 
 С помощью:
 
 • Найти 3D модели
 • Анализировать рендер
 • Создавать текстуры
-• Получить профессиональный feedback
+• Получать feedback
 
-👇 Выберите нужный раздел""",
+👇 Выберите раздел
+""",
+reply_markup=menus["ru"]
+)
 
-        "payment_text":
-"""💳 <b>ТАРИФЫ ПОДПИСКИ</b>
+```
+elif message.text == "🇬🇧 English":
 
-💎 Обычная оплата
-━━━━━━━━━━━━━━
+    user_languages[user_id] = "en"
 
-1 Месяц — 34.999 сум
-3 Месяца — 95.000 сум
+    await message.answer(
+        """
+```
 
-👇 Нажмите кнопку для оплаты""",
-
-        "payment_button": "💳 Оплатить",
-
-        "model_search": "🔎 Поиск Модели",
-        "render_feedback": "📸 Анализ Рендера",
-        "model_feedback": "🧠 Анализ Модели",
-        "texture": "🎨 Создать Текстуру",
-        "stats": "📊 Статистика",
-        "payment": "💳 Оплата"
-    },
-
-    "en": {
-
-        "welcome":
-"""🔥 <b>3D ASSISTANT AI</b>
+🔥 3D ASSISTANT AI
 
 With this bot you can:
 
@@ -106,171 +193,110 @@ With this bot you can:
 • Create textures
 • Get professional feedback
 
-👇 Choose a section below""",
+👇 Choose a section
+""",
+reply_markup=menus["en"]
+)
 
-        "payment_text":
-"""💳 <b>SUBSCRIPTION PLANS</b>
+# =========================
+
+# PAYMENT WEB APP
+
+# =========================
+
+@dp.message(F.text.in_(["💳 To'lov", "💳 Оплата", "💳 Payment"]))
+async def payment_handler(message: Message):
+
+```
+user_id = message.from_user.id
+lang = user_languages.get(user_id, "uz")
+
+payment_texts = {
+
+    "uz": """
+```
+
+💳 OBUNA REJALARI
+
+💎 Oddiy To'lov
+━━━━━━━━━━━━━━━
+
+1 Oy — 34.999 so'm
+3 Oy — 95.000 so'm
+
+👇 To'lov qilish uchun tugmani bosing
+""",
+
+```
+    "ru": """
+```
+
+💳 ПЛАНЫ ПОДПИСКИ
+
+💎 Обычная оплата
+━━━━━━━━━━━━━━━
+
+1 Месяц — 34.999 сум
+3 Месяца — 95.000 сум
+
+👇 Нажмите кнопку для оплаты
+""",
+
+```
+    "en": """
+```
+
+💳 SUBSCRIPTION PLANS
 
 💎 Standard Payment
-━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━
 
-1 Month — 34.999 uzs
-3 Months — 95.000 uzs
+1 Month — 34.999 UZS
+3 Months — 95.000 UZS
 
-👇 Click the button below to pay""",
-
-        "payment_button": "💳 Pay Now",
-
-        "model_search": "🔎 Model Search",
-        "render_feedback": "📸 Render Feedback",
-        "model_feedback": "🧠 Model Feedback",
-        "texture": "🎨 Create Texture",
-        "stats": "📊 Statistics",
-        "payment": "💳 Payment"
-    }
+👇 Press the payment button
+"""
 }
 
+```
+button_texts = {
+    "uz": "💳 To'lov Qilish",
+    "ru": "💳 Оплатить",
+    "en": "💳 Pay Now"
+}
 
-# =========================
-# KEYBOARD
-# =========================
-
-def get_main_keyboard(lang):
-
-    return ReplyKeyboardMarkup(
-        keyboard=[
-
-            [
-                KeyboardButton(text=texts[lang]["model_search"])
-            ],
-
-            [
-                KeyboardButton(text=texts[lang]["render_feedback"]),
-                KeyboardButton(text=texts[lang]["model_feedback"])
-            ],
-
-            [
-                KeyboardButton(text=texts[lang]["texture"])
-            ],
-
-            [
-                KeyboardButton(text=texts[lang]["stats"]),
-                KeyboardButton(text=texts[lang]["payment"])
-            ]
-        ],
-        resize_keyboard=True
-    )
-
-
-# =========================
-# START
-# =========================
-
-@dp.message(F.text == "/start")
-async def start(message: Message):
-
-    language_keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text="🇺🇿 Uzbek"),
-                KeyboardButton(text="🇷🇺 Русский"),
-                KeyboardButton(text="🇺🇸 English")
-            ]
-        ],
-        resize_keyboard=True
-    )
-
-    await message.answer(
-        "🌍 Tilni tanlang / Выберите язык / Choose language",
-        reply_markup=language_keyboard
-    )
-
-
-# =========================
-# UZBEK
-# =========================
-
-@dp.message(F.text == "🇺🇿 Uzbek")
-async def uzbek_language(message: Message):
-
-    user_languages[message.from_user.id] = "uz"
-
-    await message.answer(
-        texts["uz"]["welcome"],
-        reply_markup=get_main_keyboard("uz")
-    )
-
-
-# =========================
-# RUSSIAN
-# =========================
-
-@dp.message(F.text == "🇷🇺 Русский")
-async def russian_language(message: Message):
-
-    user_languages[message.from_user.id] = "ru"
-
-    await message.answer(
-        texts["ru"]["welcome"],
-        reply_markup=get_main_keyboard("ru")
-    )
-
-
-# =========================
-# ENGLISH
-# =========================
-
-@dp.message(F.text == "🇺🇸 English")
-async def english_language(message: Message):
-
-    user_languages[message.from_user.id] = "en"
-
-    await message.answer(
-        texts["en"]["welcome"],
-        reply_markup=get_main_keyboard("en")
-    )
-
-
-# =========================
-# PAYMENT
-# =========================
-
-@dp.message(F.text.in_([
-    "💳 To'lov",
-    "💳 Оплата",
-    "💳 Payment"
-]))
-async def payment(message: Message):
-
-    lang = user_languages.get(message.from_user.id, "uz")
-
-    payment_keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(
-                    text=texts[lang]["payment_button"]
+keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text=button_texts[lang],
+                web_app=WebAppInfo(
+                    url="https://v0-3d-assistant-ai.vercel.app/"
                 )
-            ]
-        ],
-        resize_keyboard=True
-    )
+            )
+        ]
+    ]
+)
 
-    await message.answer(
-        texts[lang]["payment_text"],
-        reply_markup=payment_keyboard
-    )
-
+await message.answer(
+    payment_texts[lang],
+    reply_markup=keyboard
+)
+```
 
 # =========================
+
 # MAIN
+
 # =========================
 
 async def main():
 
-    logging.basicConfig(level=logging.INFO)
+```
+logging.basicConfig(level=logging.INFO)
 
-    await dp.start_polling(bot)
+await dp.start_polling(bot)
+```
 
-
-if __name__ == "__main__":
-    asyncio.run(main())
+if **name** == "**main**":
+asyncio.run(main())
