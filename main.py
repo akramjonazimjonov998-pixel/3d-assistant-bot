@@ -253,7 +253,39 @@ async def payment_handler(message: Message):
 # =========================
 # MAIN
 # =========================
+@dp.message(F.text == "🔎 Find Models")
+async def find_models(message: Message):
+    await message.answer(
+        "Send model name 🔎\n\nExample:\nChair\nSofa\nLamp"
+    )
 
+
+@dp.message(F.text == "📸 Render Feedback")
+async def render_feedback(message: Message):
+    await message.answer(
+        "Send your render image 📸"
+    )
+
+
+@dp.message(F.text == "🧠 Model Feedback")
+async def model_feedback(message: Message):
+    await message.answer(
+        "Send your 3D model screenshots 🧠"
+    )
+
+
+@dp.message(F.text == "🎨 Create Texture")
+async def create_texture(message: Message):
+    await message.answer(
+        "Describe texture 🎨\n\nExample:\nWood\nMetal\nMarble"
+    )
+
+
+@dp.message(F.text == "📊 Statistics")
+async def statistics(message: Message):
+    await message.answer(
+        "📊 Bot statistics:\n\n👥 Users: 24K\n💎 Premium: 2.1K"
+    )
 async def main():
 
     logging.basicConfig(level=logging.INFO)
