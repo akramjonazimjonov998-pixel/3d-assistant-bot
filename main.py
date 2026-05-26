@@ -237,7 +237,7 @@ async def payment_handler(message: Message):
             [
                 InlineKeyboardButton(
                     text=button_texts[lang],
-                    web_app=WebAppInfo(
+                    web_app=WebAppInfo(http://localhost:5173/
                         url="https://premium-web.vercel.app"
                     )
                 )
