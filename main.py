@@ -1,11 +1,11 @@
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (
-Message,
-ReplyKeyboardMarkup,
-KeyboardButton,
-InlineKeyboardMarkup,
-InlineKeyboardButton,
-WebAppInfo
+    Message,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    WebAppInfo
 )
 from aiogram.filters import CommandStart
 
@@ -21,124 +21,108 @@ dp = Dispatcher()
 user_languages = {}
 
 # =========================
-
 # LANGUAGE KEYBOARD
-
 # =========================
 
 language_keyboard = ReplyKeyboardMarkup(
-keyboard=[
-[
-KeyboardButton(text="🇺🇿 Uzbek"),
-KeyboardButton(text="🇷🇺 Русский"),
-KeyboardButton(text="🇬🇧 English")
-]
-],
-resize_keyboard=True
+    keyboard=[
+        [
+            KeyboardButton(text="🇺🇿 Uzbek"),
+            KeyboardButton(text="🇷🇺 Русский"),
+            KeyboardButton(text="🇬🇧 English")
+        ]
+    ],
+    resize_keyboard=True
 )
 
 # =========================
-
 # MENUS
-
 # =========================
 
 menus = {
 
-```
-"uz": ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text="🔎 Model Izlash"),
-            KeyboardButton(text="📸 Render Feedback")
+    "uz": ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text="🔎 Model Izlash"),
+                KeyboardButton(text="📸 Render Feedback")
+            ],
+            [
+                KeyboardButton(text="🧠 Model Feedback"),
+                KeyboardButton(text="🎨 Texture Yaratish")
+            ],
+            [
+                KeyboardButton(text="📊 Statistika"),
+                KeyboardButton(text="💳 To'lov")
+            ]
         ],
-        [
-            KeyboardButton(text="🧠 Model Feedback"),
-            KeyboardButton(text="🎨 Texture Yaratish")
-        ],
-        [
-            KeyboardButton(text="📊 Statistika"),
-            KeyboardButton(text="💳 To'lov")
-        ]
-    ],
-    resize_keyboard=True
-),
+        resize_keyboard=True
+    ),
 
-"ru": ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text="🔎 Поиск Моделей"),
-            KeyboardButton(text="📸 Анализ Рендера")
+    "ru": ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text="🔎 Поиск Моделей"),
+                KeyboardButton(text="📸 Анализ Рендера")
+            ],
+            [
+                KeyboardButton(text="🧠 Feedback Модели"),
+                KeyboardButton(text="🎨 Создать Текстуру")
+            ],
+            [
+                KeyboardButton(text="📊 Статистика"),
+                KeyboardButton(text="💳 Оплата")
+            ]
         ],
-        [
-            KeyboardButton(text="🧠 Feedback Модели"),
-            KeyboardButton(text="🎨 Создать Текстуру")
-        ],
-        [
-            KeyboardButton(text="📊 Статистика"),
-            KeyboardButton(text="💳 Оплата")
-        ]
-    ],
-    resize_keyboard=True
-),
+        resize_keyboard=True
+    ),
 
-"en": ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text="🔎 Find Models"),
-            KeyboardButton(text="📸 Render Feedback")
+    "en": ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text="🔎 Find Models"),
+                KeyboardButton(text="📸 Render Feedback")
+            ],
+            [
+                KeyboardButton(text="🧠 Model Feedback"),
+                KeyboardButton(text="🎨 Create Texture")
+            ],
+            [
+                KeyboardButton(text="📊 Statistics"),
+                KeyboardButton(text="💳 Payment")
+            ]
         ],
-        [
-            KeyboardButton(text="🧠 Model Feedback"),
-            KeyboardButton(text="🎨 Create Texture")
-        ],
-        [
-            KeyboardButton(text="📊 Statistics"),
-            KeyboardButton(text="💳 Payment")
-        ]
-    ],
-    resize_keyboard=True
-)
-```
-
+        resize_keyboard=True
+    )
 }
 
 # =========================
-
 # START
-
 # =========================
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
 
-```
-await message.answer(
-    "🌍 Tilni tanlang / Выберите язык / Choose language",
-    reply_markup=language_keyboard
-)
-```
+    await message.answer(
+        "🌍 Tilni tanlang / Выберите язык / Choose language",
+        reply_markup=language_keyboard
+    )
 
 # =========================
-
 # LANGUAGE SELECT
-
 # =========================
 
 @dp.message(F.text.in_(["🇺🇿 Uzbek", "🇷🇺 Русский", "🇬🇧 English"]))
 async def language_handler(message: Message):
 
-```
-user_id = message.from_user.id
+    user_id = message.from_user.id
 
-if message.text == "🇺🇿 Uzbek":
+    if message.text == "🇺🇿 Uzbek":
 
-    user_languages[user_id] = "uz"
+        user_languages[user_id] = "uz"
 
-    await message.answer(
-        """
-```
-
+        await message.answer(
+            """
 🔥 3D ASSISTANT AI
 
 Yordamida:
@@ -150,18 +134,15 @@ Yordamida:
 
 👇 Kerakli bo'limni tanlang
 """,
-reply_markup=menus["uz"]
-)
+            reply_markup=menus["uz"]
+        )
 
-```
-elif message.text == "🇷🇺 Русский":
+    elif message.text == "🇷🇺 Русский":
 
-    user_languages[user_id] = "ru"
+        user_languages[user_id] = "ru"
 
-    await message.answer(
-        """
-```
-
+        await message.answer(
+            """
 🔥 3D ASSISTANT AI
 
 С помощью:
@@ -173,18 +154,15 @@ elif message.text == "🇷🇺 Русский":
 
 👇 Выберите раздел
 """,
-reply_markup=menus["ru"]
-)
+            reply_markup=menus["ru"]
+        )
 
-```
-elif message.text == "🇬🇧 English":
+    elif message.text == "🇬🇧 English":
 
-    user_languages[user_id] = "en"
+        user_languages[user_id] = "en"
 
-    await message.answer(
-        """
-```
-
+        await message.answer(
+            """
 🔥 3D ASSISTANT AI
 
 With this bot you can:
@@ -196,27 +174,22 @@ With this bot you can:
 
 👇 Choose a section
 """,
-reply_markup=menus["en"]
-)
+            reply_markup=menus["en"]
+        )
 
 # =========================
-
 # PAYMENT
-
 # =========================
 
 @dp.message(F.text.in_(["💳 To'lov", "💳 Оплата", "💳 Payment"]))
 async def payment_handler(message: Message):
 
-```
-user_id = message.from_user.id
-lang = user_languages.get(user_id, "uz")
+    user_id = message.from_user.id
+    lang = user_languages.get(user_id, "uz")
 
-payment_texts = {
+    payment_texts = {
 
-    "uz": """
-```
-
+        "uz": """
 💳 OBUNA REJALARI
 
 💎 Oddiy To'lov
@@ -228,10 +201,7 @@ payment_texts = {
 👇 To'lov qilish uchun tugmani bosing
 """,
 
-```
-    "ru": """
-```
-
+        "ru": """
 💳 ПЛАНЫ ПОДПИСКИ
 
 💎 Обычная оплата
@@ -243,10 +213,7 @@ payment_texts = {
 👇 Нажмите кнопку для оплаты
 """,
 
-```
-    "en": """
-```
-
+        "en": """
 💳 SUBSCRIPTION PLANS
 
 💎 Standard Payment
@@ -257,48 +224,41 @@ payment_texts = {
 
 👇 Press the payment button
 """
-}
+    }
 
-```
-button_texts = {
-    "uz": "💳 To'lov Qilish",
-    "ru": "💳 Оплатить",
-    "en": "💳 Pay Now"
-}
+    button_texts = {
+        "uz": "💳 To'lov Qilish",
+        "ru": "💳 Оплатить",
+        "en": "💳 Pay Now"
+    }
 
-keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text=button_texts[lang],
-                web_app=WebAppInfo(
-                    url="https://v0-3d-assistant-ai.vercel.app/"
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=button_texts[lang],
+                    web_app=WebAppInfo(
+                        url="https://v0-3d-assistant-ai.vercel.app/"
+                    )
                 )
-            )
+            ]
         ]
-    ]
-)
+    )
 
-await message.answer(
-    payment_texts[lang],
-    reply_markup=keyboard
-)
-```
+    await message.answer(
+        payment_texts[lang],
+        reply_markup=keyboard
+    )
 
 # =========================
-
 # MAIN
-
 # =========================
 
 async def main():
 
-```
-logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
-await dp.start_polling(bot)
-```
+    await dp.start_polling(bot)
 
-if **name** == "**main**":
-asyncio.run(main())
-
+if __name__ == "__main__":
+    asyncio.run(main())
