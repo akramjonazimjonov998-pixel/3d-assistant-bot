@@ -8,6 +8,7 @@ InlineKeyboardButton,
 WebAppInfo
 )
 from aiogram.filters import CommandStart
+
 import asyncio
 import logging
 import os
@@ -16,6 +17,12 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+
+# =========================
+
+# LANGUAGES
+
+# =========================
 
 user_languages = {}
 
@@ -200,7 +207,7 @@ reply_markup=menus["en"]
 
 # =========================
 
-# PAYMENT WEB APP
+# PAYMENT
 
 # =========================
 
@@ -300,3 +307,4 @@ await dp.start_polling(bot)
 
 if **name** == "**main**":
 asyncio.run(main())
+
