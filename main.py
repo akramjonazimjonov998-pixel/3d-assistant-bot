@@ -251,41 +251,99 @@ async def payment_handler(message: Message):
     )
 
 # =========================
+# FIND MODELS
+# =========================
+
+@dp.message(F.text.in_(["🔎 Model Izlash", "🔎 Поиск Моделей", "🔎 Find Models"]))
+async def find_models(message: Message):
+
+    user_id = message.from_user.id
+    lang = user_languages.get(user_id, "uz")
+
+    texts = {
+        "uz": "🔎 Model nomini yuboring",
+        "ru": "🔎 Отправьте название модели",
+        "en": "🔎 Send model name"
+    }
+
+    await message.answer(texts[lang])
+
+# =========================
+# RENDER FEEDBACK
+# =========================
+
+@dp.message(F.text.in_(["📸 Render Feedback", "📸 Анализ Рендера"]))
+async def render_feedback(message: Message):
+
+    user_id = message.from_user.id
+    lang = user_languages.get(user_id, "uz")
+
+    texts = {
+        "uz": "📸 Render rasmini yuboring",
+        "ru": "📸 Отправьте render изображение",
+        "en": "📸 Send your render image"
+    }
+
+    await message.answer(texts[lang])
+
+# =========================
+# MODEL FEEDBACK
+# =========================
+
+@dp.message(F.text.in_(["🧠 Model Feedback", "🧠 Feedback Модели"]))
+async def model_feedback(message: Message):
+
+    user_id = message.from_user.id
+    lang = user_languages.get(user_id, "uz")
+
+    texts = {
+        "uz": "🧠 3D model screenshotlarini yuboring",
+        "ru": "🧠 Отправьте скриншоты 3D модели",
+        "en": "🧠 Send your 3D model screenshots"
+    }
+
+    await message.answer(texts[lang])
+
+# =========================
+# CREATE TEXTURE
+# =========================
+
+@dp.message(F.text.in_(["🎨 Texture Yaratish", "🎨 Создать Текстуру", "🎨 Create Texture"]))
+async def create_texture(message: Message):
+
+    user_id = message.from_user.id
+    lang = user_languages.get(user_id, "uz")
+
+    texts = {
+        "uz": "🎨 Texture nomini yozing",
+        "ru": "🎨 Напишите название текстуры",
+        "en": "🎨 Describe texture"
+    }
+
+    await message.answer(texts[lang])
+
+# =========================
+# STATISTICS
+# =========================
+
+@dp.message(F.text.in_(["📊 Statistika", "📊 Статистика", "📊 Statistics"]))
+async def statistics(message: Message):
+
+    user_id = message.from_user.id
+    lang = user_languages.get(user_id, "uz")
+
+    texts = {
+        "uz": "📊 Bot statistikasi\n\n👥 Users: 24K\n💎 Premium: 2.1K",
+        "ru": "📊 Статистика бота\n\n👥 Пользователи: 24K\n💎 Premium: 2.1K",
+        "en": "📊 Bot statistics\n\n👥 Users: 24K\n💎 Premium: 2.1K"
+    }
+
+    await message.answer(texts[lang])
+
+# =========================
 # MAIN
 # =========================
-@dp.message(F.text == "🔎 Find Models")
-async def find_models(message: Message):
-    await message.answer(
-        "Send model name 🔎\n\nExample:\nChair\nSofa\nLamp"
-    )
 
-
-@dp.message(F.text == "📸 Render Feedback")
-async def render_feedback(message: Message):
-    await message.answer(
-        "Send your render image 📸"
-    )
-
-
-@dp.message(F.text == "🧠 Model Feedback")
-async def model_feedback(message: Message):
-    await message.answer(
-        "Send your 3D model screenshots 🧠"
-    )
-
-
-@dp.message(F.text == "🎨 Create Texture")
-async def create_texture(message: Message):
-    await message.answer(
-        "Describe texture 🎨\n\nExample:\nWood\nMetal\nMarble"
-    )
-
-
-@dp.message(F.text == "📊 Statistics")
-async def statistics(message: Message):
-    await message.answer(
-        "📊 Bot statistics:\n\n👥 Users: 24K\n💎 Premium: 2.1K"
-    )
 async def main():
 
     logging.basicConfig(level=logging.INFO)
