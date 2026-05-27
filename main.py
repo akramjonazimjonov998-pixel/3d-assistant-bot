@@ -418,10 +418,11 @@ async def image_handler(message: Message):
             """
 🔎 AI model qidirmoqda...
 
-🌐 3DDD
-🌐 Sketchfab
-🌐 CGTrader
-🌐 Telegram Channels
+🌐 https://3ddd.ru
+
+🌐 https://sketchfab.com
+
+🌐 https://cgtrader.com
 """
         )
 
@@ -473,6 +474,37 @@ async def image_handler(message: Message):
 @dp.message(F.text)
 async def text_search(message: Message):
 
+    buttons = [
+        "📊 Statistika",
+        "📊 Statistics",
+        "📊 Статистика",
+
+        "💳 To'lov",
+        "💳 Payment",
+        "💳 Оплата",
+
+        "🌍 Tilni O'zgartirish",
+        "🌍 Change Language",
+        "🌍 Сменить Язык",
+
+        "🔎 Model Izlash",
+        "🔎 Поиск Моделей",
+        "🔎 Find Models",
+
+        "📸 Render Feedback",
+        "📸 Анализ Рендера",
+
+        "🧠 Model Feedback",
+        "🧠 Feedback Модели",
+
+        "🎨 Texture Yaratish",
+        "🎨 Создать Текстуру",
+        "🎨 Create Texture"
+    ]
+
+    if message.text in buttons:
+        return
+
     user_id = message.from_user.id
 
     mode = user_modes.get(user_id)
@@ -504,6 +536,10 @@ async def text_search(message: Message):
 🌐 https://ambientcg.com/list?search={text}
 """
         )
+
+    else:
+
+        return
 
 # =========================
 # STATISTICS
