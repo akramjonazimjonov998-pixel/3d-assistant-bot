@@ -54,6 +54,9 @@ menus = {
             [
                 KeyboardButton(text="📊 Statistika"),
                 KeyboardButton(text="💳 To'lov")
+            ],
+            [
+                KeyboardButton(text="🌍 Tilni O'zgartirish")
             ]
         ],
         resize_keyboard=True
@@ -72,6 +75,9 @@ menus = {
             [
                 KeyboardButton(text="📊 Статистика"),
                 KeyboardButton(text="💳 Оплата")
+            ],
+            [
+                KeyboardButton(text="🌍 Сменить Язык")
             ]
         ],
         resize_keyboard=True
@@ -90,6 +96,9 @@ menus = {
             [
                 KeyboardButton(text="📊 Statistics"),
                 KeyboardButton(text="💳 Payment")
+            ],
+            [
+                KeyboardButton(text="🌍 Change Language")
             ]
         ],
         resize_keyboard=True
@@ -176,6 +185,22 @@ With this bot you can:
 """,
             reply_markup=menus["en"]
         )
+
+# =========================
+# CHANGE LANGUAGE
+# =========================
+
+@dp.message(F.text.in_([
+    "🌍 Tilni O'zgartirish",
+    "🌍 Сменить Язык",
+    "🌍 Change Language"
+]))
+async def change_language(message: Message):
+
+    await message.answer(
+        "🌍 Tilni tanlang / Выберите язык / Choose language",
+        reply_markup=language_keyboard
+    )
 
 # =========================
 # PAYMENT
