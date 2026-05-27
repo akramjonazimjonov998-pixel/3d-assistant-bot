@@ -18,7 +18,12 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# =========================
+# DATABASE
+# =========================
+
 user_languages = {}
+user_stats = {}
 
 # =========================
 # LANGUAGE KEYBOARD
@@ -285,6 +290,16 @@ async def find_models(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
+    if user_id not in user_stats:
+        user_stats[user_id] = {
+            "models": 0,
+            "renders": 0,
+            "feedbacks": 0,
+            "textures": 0
+        }
+
+    user_stats[user_id]["models"] += 1
+
     texts = {
         "uz": "🔎 Model nomini yuboring",
         "ru": "🔎 Отправьте название модели",
@@ -302,6 +317,16 @@ async def render_feedback(message: Message):
 
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
+
+    if user_id not in user_stats:
+        user_stats[user_id] = {
+            "models": 0,
+            "renders": 0,
+            "feedbacks": 0,
+            "textures": 0
+        }
+
+    user_stats[user_id]["renders"] += 1
 
     texts = {
         "uz": "📸 Render rasmini yuboring",
@@ -321,6 +346,16 @@ async def model_feedback(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
+    if user_id not in user_stats:
+        user_stats[user_id] = {
+            "models": 0,
+            "renders": 0,
+            "feedbacks": 0,
+            "textures": 0
+        }
+
+    user_stats[user_id]["feedbacks"] += 1
+
     texts = {
         "uz": "🧠 3D model screenshotlarini yuboring",
         "ru": "🧠 Отправьте скриншоты 3D модели",
@@ -338,6 +373,16 @@ async def create_texture(message: Message):
 
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
+
+    if user_id not in user_stats:
+        user_stats[user_id] = {
+            "models": 0,
+            "renders": 0,
+            "feedbacks": 0,
+            "textures": 0
+        }
+
+    user_stats[user_id]["textures"] += 1
 
     texts = {
         "uz": "🎨 Texture nomini yozing",
@@ -357,10 +402,44 @@ async def statistics(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
+    if user_id not in user_stats:
+        user_stats[user_id] = {
+            "models": 0,
+            "renders": 0,
+            "feedbacks": 0,
+            "textures": 0
+        }
+
+    stats = user_stats[user_id]
+
     texts = {
-        "uz": "📊 Bot statistikasi\n\n👥 Users: 24K\n💎 Premium: 2.1K",
-        "ru": "📊 Статистика бота\n\n👥 Пользователи: 24K\n💎 Premium: 2.1K",
-        "en": "📊 Bot statistics\n\n👥 Users: 24K\n💎 Premium: 2.1K"
+
+        "uz": f"""
+📊 Sizning Statistikangiz
+
+🔎 Model qidirish: {stats['models']}
+📸 Render feedback: {stats['renders']}
+🧠 Model feedback: {stats['feedbacks']}
+🎨 Texture yaratish: {stats['textures']}
+""",
+
+        "ru": f"""
+📊 Ваша Статистика
+
+🔎 Поиск моделей: {stats['models']}
+📸 Render feedback: {stats['renders']}
+🧠 Feedback модели: {stats['feedbacks']}
+🎨 Создание текстур: {stats['textures']}
+""",
+
+        "en": f"""
+📊 Your Statistics
+
+🔎 Model searches: {stats['models']}
+📸 Render feedback: {stats['renders']}
+🧠 Model feedback: {stats['feedbacks']}
+🎨 Texture creation: {stats['textures']}
+"""
     }
 
     await message.answer(texts[lang])
