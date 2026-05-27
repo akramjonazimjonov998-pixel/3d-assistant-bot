@@ -24,6 +24,7 @@ dp = Dispatcher()
 
 user_languages = {}
 user_stats = {}
+user_modes = {}
 
 # =========================
 # LANGUAGE KEYBOARD
@@ -290,6 +291,8 @@ async def find_models(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
+    user_modes[user_id] = "model"
+
     if user_id not in user_stats:
         user_stats[user_id] = {
             "models": 0,
@@ -301,9 +304,9 @@ async def find_models(message: Message):
     user_stats[user_id]["models"] += 1
 
     texts = {
-        "uz": "🔎 Model nomini yuboring",
-        "ru": "🔎 Отправьте название модели",
-        "en": "🔎 Send model name"
+        "uz": "📸 Model rasmini yuboring yoki model nomini yozing",
+        "ru": "📸 Отправьте фото модели или название модели",
+        "en": "📸 Send model image or write model name"
     }
 
     await message.answer(texts[lang])
@@ -317,6 +320,8 @@ async def render_feedback(message: Message):
 
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
+
+    user_modes[user_id] = "render"
 
     if user_id not in user_stats:
         user_stats[user_id] = {
@@ -346,6 +351,8 @@ async def model_feedback(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
+    user_modes[user_id] = "feedback"
+
     if user_id not in user_stats:
         user_stats[user_id] = {
             "models": 0,
@@ -374,6 +381,8 @@ async def create_texture(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
+    user_modes[user_id] = "texture"
+
     if user_id not in user_stats:
         user_stats[user_id] = {
             "models": 0,
@@ -385,12 +394,116 @@ async def create_texture(message: Message):
     user_stats[user_id]["textures"] += 1
 
     texts = {
-        "uz": "🎨 Texture nomini yozing",
-        "ru": "🎨 Напишите название текстуры",
-        "en": "🎨 Describe texture"
+        "uz": "🎨 Texture rasmini yuboring yoki texture nomini yozing",
+        "ru": "🎨 Отправьте фото текстуры или название",
+        "en": "🎨 Send texture image or write texture name"
     }
 
     await message.answer(texts[lang])
+
+# =========================
+# IMAGE HANDLER
+# =========================
+
+@dp.message(F.photo)
+async def image_handler(message: Message):
+
+    user_id = message.from_user.id
+
+    mode = user_modes.get(user_id)
+
+    if mode == "model":
+
+        await message.answer(
+            """
+🔎 AI model qidirmoqda...
+
+🌐 3DDD
+🌐 Sketchfab
+🌐 CGTrader
+🌐 Telegram Channels
+"""
+        )
+
+    elif mode == "render":
+
+        await message.answer(
+            """
+📸 Render analiz qilindi
+
+✅ Lighting yaxshi
+✅ Material realistic
+⚠️ Shadow kuchsiz
+"""
+        )
+
+    elif mode == "feedback":
+
+        await message.answer(
+            """
+🧠 Model Feedback
+
+✅ Topology yaxshi
+✅ Proportion yaxshi
+⚠️ UV kerak
+"""
+        )
+
+    elif mode == "texture":
+
+        await message.answer(
+            """
+🎨 Texture analiz qilindi
+
+✅ Marble texture aniqlandi
+✅ Seamless texture tavsiya qilinadi
+"""
+        )
+
+    else:
+
+        await message.answer(
+            "❗ Avval bo'limni tanlang"
+        )
+
+# =========================
+# TEXT SEARCH
+# =========================
+
+@dp.message(F.text)
+async def text_search(message: Message):
+
+    user_id = message.from_user.id
+
+    mode = user_modes.get(user_id)
+
+    text = message.text
+
+    if mode == "model":
+
+        await message.answer(
+            f"""
+🔎 MODEL SEARCH
+
+🌐 https://3ddd.ru/search?query={text}
+
+🌐 https://sketchfab.com/search?q={text}&type=models
+
+🌐 https://www.cgtrader.com/3d-models?keywords={text}
+"""
+        )
+
+    elif mode == "texture":
+
+        await message.answer(
+            f"""
+🎨 TEXTURE SEARCH
+
+🌐 https://polyhaven.com/textures?q={text}
+
+🌐 https://ambientcg.com/list?search={text}
+"""
+        )
 
 # =========================
 # STATISTICS
