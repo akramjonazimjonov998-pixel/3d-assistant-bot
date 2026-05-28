@@ -103,7 +103,7 @@ async def start(message: Message):
 @dp.message(F.text == "🔎 Model Izlash")
 async def model_mode(message: Message):
 
-```
+
 user_modes[message.from_user.id] = "model"
 
 await message.answer(
