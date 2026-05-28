@@ -81,7 +81,7 @@ FREE_CHANNELS = [
 @dp.message(CommandStart())
 async def start(message: Message):
 
-```
+
 await message.answer(
     """
 ```
