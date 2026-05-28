@@ -5,10 +5,10 @@ from aiogram.types import (
     InlineKeyboardButton,
     CallbackQuery
     )
-    from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart
 
-    from telethon import TelegramClient
-    from openai import OpenAI
+from telethon import TelegramClient
+from openai import OpenAI
 
     import asyncio
     import logging
