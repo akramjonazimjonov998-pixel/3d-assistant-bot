@@ -3,7 +3,10 @@ from aiogram.types import (
     Message,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    CallbackQuery
+    CallbackQuery,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+    FSInputFile
 )
 from aiogram.filters import CommandStart
 
@@ -13,14 +16,12 @@ from openai import OpenAI
 import asyncio
 import logging
 import os
-import base64
 
 # =========================
 # TOKENS
 # =========================
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 API_ID = int(os.getenv("API_ID"))
@@ -49,6 +50,13 @@ tg_client = TelegramClient(
 # =========================
 
 user_modes = {}
+user_languages = {}
+stats = {
+    "users": 0,
+    "searches": 0,
+    "downloads": 0,
+    "textures": 0
+}
 
 # =========================
 # CHANNELS
@@ -58,12 +66,24 @@ FREE_CHANNELS = [
     "free3dsky",
     "Free3dmodels",
     "free_3dsky",
-    "FREE_3DSMAX_MODELS",
-    "models_for_3dmax",
-    "model_3dsmax",
-    "CG_Game_Models",
-    "arxitek03"
+    "FREE_3DSMAX_MODELS"
 ]
+
+# =========================
+# KEYBOARD
+# =========================
+
+main_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="🔎 Model Izlash")],
+        [KeyboardButton(text="🎨 Texture Yaratish")],
+        [KeyboardButton(text="📸 Render Feedback")],
+        [KeyboardButton(text="🧠 Model Feedback")],
+        [KeyboardButton(text="📊 Statistika")],
+        [KeyboardButton(text="🌍 Tilni O‘zgartirish")]
+    ],
+    resize_keyboard=True
+)
 
 # =========================
 # START
@@ -72,15 +92,15 @@ FREE_CHANNELS = [
 @dp.message(CommandStart())
 async def start(message: Message):
 
+    stats["users"] += 1
+
     await message.answer(
         """
 🔥 3D ASSISTANT AI
 
-🔎 Model Izlash
-📸 Render Feedback
-🧠 Model Feedback
-🎨 Texture Yaratish
-"""
+Kerakli bo‘limni tanlang 👇
+""",
+        reply_markup=main_keyboard
     )
 
 # =========================
@@ -94,6 +114,15 @@ async def model_mode(message: Message):
 
     await message.answer(
         "📸 Rasm yuboring yoki model nomini yozing"
+    )
+
+@dp.message(F.text == "🎨 Texture Yaratish")
+async def texture_mode(message: Message):
+
+    user_modes[message.from_user.id] = "texture"
+
+    await message.answer(
+        "🎨 Texture nomini yozing"
     )
 
 @dp.message(F.text == "📸 Render Feedback")
@@ -111,262 +140,61 @@ async def feedback_mode(message: Message):
     user_modes[message.from_user.id] = "feedback"
 
     await message.answer(
-        "🧠 Model screenshot yuboring"
+        "🧠 Model rasmini yuboring"
     )
 
-@dp.message(F.text == "🎨 Texture Yaratish")
-async def texture_mode(message: Message):
+# =========================
+# STATISTICS
+# =========================
 
-    user_modes[message.from_user.id] = "texture"
+@dp.message(F.text == "📊 Statistika")
+async def statistics(message: Message):
 
     await message.answer(
-        "🎨 Texture rasmi yoki nom yuboring"
+        f"""
+📊 BOT STATISTICS
+
+👤 Users: {stats["users"]}
+🔎 Searches: {stats["searches"]}
+📦 Downloads: {stats["downloads"]}
+🎨 Textures: {stats["textures"]}
+"""
     )
 
 # =========================
-# TELEGRAM SEARCH
+# LANGUAGE
 # =========================
 
-async def telegram_search(query):
+@dp.message(F.text == "🌍 Tilni O‘zgartirish")
+async def language(message: Message):
 
-    results = []
-
-    for channel in FREE_CHANNELS:
-
-        try:
-
-            messages = await tg_client.get_messages(
-                channel,
-                limit=5,
-                search=query
-            )
-
-            for msg in messages:
-
-                if msg.file:
-                    results.append(msg)
-
-        except:
-            pass
-
-    return results
-
-# =========================
-# IMAGE HANDLER
-# =========================
-
-@dp.message(F.photo)
-async def image_handler(message: Message):
-
-    user_id = message.from_user.id
-
-    mode = user_modes.get(user_id)
-
-    photo = message.photo[-1]
-
-    file = await bot.get_file(photo.file_id)
-
-    file_path = file.file_path
-
-    downloaded_file = await bot.download_file(file_path)
-
-    image_path = f"temp_{user_id}.jpg"
-
-    with open(image_path, "wb") as f:
-        f.write(downloaded_file.read())
-
-    await message.answer(
-        "🤖 AI analiz qilmoqda..."
-    )
-
-    with open(image_path, "rb") as image_file:
-
-        base64_image = base64.b64encode(
-            image_file.read()
-        ).decode("utf-8")
-
-    # =========================
-    # MODEL SEARCH
-    # =========================
-
-    if mode == "model":
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Detect this 3D object. Return only 1 or 2 keywords. Example: sofa, tractor, lamp, chair, table. No sentence."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🇺🇿 Uzbek",
+                    callback_data="lang_uz"
+                )
             ],
-            max_tokens=20
-        )
-
-        detected_model = response.choices[0].message.content.strip()
-
-        keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="📦 PRO MODELS",
-                        callback_data=f"pro_{detected_model}"
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="🆓 FREE MODELS",
-                        callback_data=f"free_{detected_model}"
-                    )
-                ]
+            [
+                InlineKeyboardButton(
+                    text="🇷🇺 Русский",
+                    callback_data="lang_ru"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🇺🇸 English",
+                    callback_data="lang_en"
+                )
             ]
-        )
+        ]
+    )
 
-        await message.answer(
-            f"""
-🤖 AI DETECTED:
-
-{detected_model}
-
-Kerakli bo‘limni tanlang 👇
-""",
-            reply_markup=keyboard
-        )
-
-    # =========================
-    # RENDER FEEDBACK
-    # =========================
-
-    elif mode == "render":
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Analyze this 3D render professionally."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
-            ],
-            max_tokens=300
-        )
-
-        feedback = response.choices[0].message.content
-
-        await message.answer(
-            f"""
-📸 RENDER FEEDBACK
-
-{feedback}
-"""
-        )
-
-    # =========================
-    # MODEL FEEDBACK
-    # =========================
-
-    elif mode == "feedback":
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Analyze this 3D model professionally."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
-            ],
-            max_tokens=300
-        )
-
-        feedback = response.choices[0].message.content
-
-        await message.answer(
-            f"""
-🧠 MODEL FEEDBACK
-
-{feedback}
-"""
-        )
-
-    # =========================
-    # TEXTURE GENERATOR
-    # =========================
-
-    elif mode == "texture":
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Detect this texture material. Return only short name."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
-            ],
-            max_tokens=30
-        )
-
-        detected_texture = response.choices[0].message.content
-
-        image_response = client.images.generate(
-            model="gpt-image-1",
-            prompt=f"Ultra realistic seamless {detected_texture} texture, PBR material"
-        )
-
-        image_base64 = image_response.data[0].b64_json
-
-        texture_bytes = base64.b64decode(image_base64)
-
-        texture_path = f"texture_{user_id}.png"
-
-        with open(texture_path, "wb") as f:
-            f.write(texture_bytes)
-
-        await message.answer_photo(
-            photo=open(texture_path, "rb"),
-            caption=f"🎨 AI Texture: {detected_texture}"
-        )
+    await message.answer(
+        "🌍 Tilni tanlang",
+        reply_markup=keyboard
+    )
 
 # =========================
 # TEXT SEARCH
@@ -375,13 +203,15 @@ Kerakli bo‘limni tanlang 👇
 @dp.message(F.text)
 async def text_search(message: Message):
 
-    text = message.text
+    text = message.text.lower()
 
     user_id = message.from_user.id
 
     mode = user_modes.get(user_id)
 
     if mode == "model":
+
+        stats["searches"] += 1
 
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
@@ -406,31 +236,39 @@ async def text_search(message: Message):
 
 {text}
 
-Bo‘limni tanlang 👇
+Kerakli bo‘limni tanlang 👇
 """,
             reply_markup=keyboard
         )
 
-    elif mode == "texture":
+# =========================
+# TELEGRAM SEARCH
+# =========================
 
-        image_response = client.images.generate(
-            model="gpt-image-1",
-            prompt=f"Ultra realistic seamless {text} texture, PBR material"
-        )
+async def telegram_search(query):
 
-        image_base64 = image_response.data[0].b64_json
+    results = []
 
-        texture_bytes = base64.b64decode(image_base64)
+    for channel in FREE_CHANNELS:
 
-        texture_path = f"{text}.png"
+        try:
 
-        with open(texture_path, "wb") as f:
-            f.write(texture_bytes)
+            messages = await tg_client.get_messages(
+                channel,
+                limit=20,
+                search=query
+            )
 
-        await message.answer_photo(
-            photo=open(texture_path, "rb"),
-            caption=f"🎨 Texture Created: {text}"
-        )
+            for msg in messages:
+
+                if msg.file:
+                    results.append(msg)
+
+        except Exception as e:
+
+            print(e)
+
+    return results
 
 # =========================
 # CALLBACKS
@@ -442,30 +280,40 @@ async def callbacks(callback: CallbackQuery):
     data = callback.data
 
     # =========================
+    # LANGUAGE
+    # =========================
+
+    if data.startswith("lang_"):
+
+        lang = data.replace("lang_", "")
+
+        user_languages[callback.from_user.id] = lang
+
+        await callback.message.answer(
+            f"✅ Til o‘zgartirildi: {lang}"
+        )
+
+    # =========================
     # PRO MODELS
     # =========================
 
-    if data.startswith("pro_"):
+    elif data.startswith("pro_"):
 
         query = data.replace("pro_", "")
 
-        text = f"""
+        await callback.message.answer(
+            f"""
 📦 PRO MODELS
 
 🌐 https://3ddd.ru/search?query={query}
 
-🌐 https://greatcatalog.net/?s={query}
+🌐 https://www.cgtrader.com/3d-models?keywords={query}
 
 🌐 https://www.turbosquid.com/Search/3D-Models/{query}
 
-🌐 https://www.cgtrader.com/3d-models?keywords={query}
-
-🌐 https://cgmood.com/search/{query}
-
 🌐 https://sketchfab.com/search?q={query}&type=models
 """
-
-        await callback.message.answer(text)
+        )
 
     # =========================
     # FREE MODELS
@@ -476,25 +324,50 @@ async def callbacks(callback: CallbackQuery):
         query = data.replace("free_", "")
 
         await callback.message.answer(
-            "🔎 Telegram kanallardan qidirilmoqda..."
+            "🔎 Telegramdan qidirilmoqda..."
         )
 
         telegram_results = await telegram_search(query)
 
         if telegram_results:
 
-            for result in telegram_results[:5]:
+            await callback.message.answer(
+                f"✅ {len(telegram_results)} ta model topildi"
+            )
 
-                await bot.forward_message(
-                    chat_id=callback.message.chat.id,
-                    from_chat_id=result.chat_id,
-                    message_id=result.id
-                )
+            count = 0
+
+            for result in telegram_results:
+
+                try:
+
+                    file_path = await tg_client.download_media(result)
+
+                    if file_path:
+
+                        file = FSInputFile(file_path)
+
+                        await bot.send_document(
+                            chat_id=callback.message.chat.id,
+                            document=file,
+                            caption=f"📦 MODEL: {query}"
+                        )
+
+                        stats["downloads"] += 1
+
+                        count += 1
+
+                    if count >= 5:
+                        break
+
+                except Exception as e:
+
+                    print(e)
 
         else:
 
             await callback.message.answer(
-                "❌ Telegramda model topilmadi"
+                "❌ Model topilmadi"
             )
 
 # =========================
