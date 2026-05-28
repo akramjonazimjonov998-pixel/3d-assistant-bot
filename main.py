@@ -1,5 +1,10 @@
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
+from aiogram.types import (
+    Message,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    CallbackQuery
+)
 from aiogram.filters import CommandStart
 
 from telethon import TelegramClient
@@ -71,8 +76,6 @@ async def start(message: Message):
         """
 🔥 3D ASSISTANT AI
 
-Buyruqlar:
-
 🔎 Model Izlash
 📸 Render Feedback
 🧠 Model Feedback
@@ -134,14 +137,13 @@ async def telegram_search(query):
 
             messages = await tg_client.get_messages(
                 channel,
-                limit=3,
+                limit=5,
                 search=query
             )
 
             for msg in messages:
 
                 if msg.file:
-
                     results.append(msg)
 
         except:
@@ -150,7 +152,7 @@ async def telegram_search(query):
     return results
 
 # =========================
-# PHOTO AI SYSTEM
+# IMAGE HANDLER
 # =========================
 
 @dp.message(F.photo)
@@ -197,7 +199,7 @@ async def image_handler(message: Message):
                     "content": [
                         {
                             "type": "text",
-                            "text": "What 3D object is this? Answer short only."
+                            "text": "Detect this 3D object. Return only 1 or 2 keywords. Example: sofa, tractor, lamp, chair, table. No sentence."
                         },
                         {
                             "type": "image_url",
@@ -208,10 +210,27 @@ async def image_handler(message: Message):
                     ]
                 }
             ],
-            max_tokens=30
+            max_tokens=20
         )
 
-        detected_model = response.choices[0].message.content
+        detected_model = response.choices[0].message.content.strip()
+
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="📦 PRO MODELS",
+                        callback_data=f"pro_{detected_model}"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="🆓 FREE MODELS",
+                        callback_data=f"free_{detected_model}"
+                    )
+                ]
+            ]
+        )
 
         await message.answer(
             f"""
@@ -219,39 +238,10 @@ async def image_handler(message: Message):
 
 {detected_model}
 
-🔎 PRO SEARCH
-
-🌐 https://3ddd.ru/search?query={detected_model}
-
-🌐 https://www.cgtrader.com/3d-models?keywords={detected_model}
-
-🌐 https://sketchfab.com/search?q={detected_model}&type=models
-"""
+Kerakli bo‘limni tanlang 👇
+""",
+            reply_markup=keyboard
         )
-
-        telegram_results = await telegram_search(
-            detected_model
-        )
-
-        if telegram_results:
-
-            await message.answer(
-                "📦 FREE MODELS TOPILDI"
-            )
-
-            for result in telegram_results[:3]:
-
-                await bot.forward_message(
-                    chat_id=message.chat.id,
-                    from_chat_id=result.chat_id,
-                    message_id=result.id
-                )
-
-        else:
-
-            await message.answer(
-                "❌ Telegramda model topilmadi"
-            )
 
     # =========================
     # RENDER FEEDBACK
@@ -267,7 +257,7 @@ async def image_handler(message: Message):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Analyze this 3D render professionally. Tell lighting, realism, composition and weak points."
+                            "text": "Analyze this 3D render professionally."
                         },
                         {
                             "type": "image_url",
@@ -305,7 +295,7 @@ async def image_handler(message: Message):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Analyze this 3D model professionally. Tell topology, mesh quality, UV and modeling problems."
+                            "text": "Analyze this 3D model professionally."
                         },
                         {
                             "type": "image_url",
@@ -330,7 +320,7 @@ async def image_handler(message: Message):
         )
 
     # =========================
-    # TEXTURE AI
+    # TEXTURE GENERATOR
     # =========================
 
     elif mode == "texture":
@@ -343,7 +333,7 @@ async def image_handler(message: Message):
                     "content": [
                         {
                             "type": "text",
-                            "text": "What texture or material is this? Answer short only."
+                            "text": "Detect this texture material. Return only short name."
                         },
                         {
                             "type": "image_url",
@@ -354,27 +344,28 @@ async def image_handler(message: Message):
                     ]
                 }
             ],
-            max_tokens=50
+            max_tokens=30
         )
 
         detected_texture = response.choices[0].message.content
 
         image_response = client.images.generate(
             model="gpt-image-1",
-            prompt=f"Ultra realistic seamless {detected_texture} texture, PBR material, high quality"
+            prompt=f"Ultra realistic seamless {detected_texture} texture, PBR material"
         )
 
-        texture_url = image_response.data[0].url
+        image_base64 = image_response.data[0].b64_json
 
-        await message.answer(
-            f"""
-🎨 AI TEXTURE CREATED
+        texture_bytes = base64.b64decode(image_base64)
 
-Texture:
-{detected_texture}
+        texture_path = f"texture_{user_id}.png"
 
-🖼 {texture_url}
-"""
+        with open(texture_path, "wb") as f:
+            f.write(texture_bytes)
+
+        await message.answer_photo(
+            photo=open(texture_path, "rb"),
+            caption=f"🎨 AI Texture: {detected_texture}"
         )
 
 # =========================
@@ -392,58 +383,119 @@ async def text_search(message: Message):
 
     if mode == "model":
 
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="📦 PRO MODELS",
+                        callback_data=f"pro_{text}"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="🆓 FREE MODELS",
+                        callback_data=f"free_{text}"
+                    )
+                ]
+            ]
+        )
+
         await message.answer(
             f"""
-🔎 PRO SEARCH
+🔎 SEARCH:
 
-🌐 https://3ddd.ru/search?query={text}
+{text}
 
-🌐 https://www.cgtrader.com/3d-models?keywords={text}
+Bo‘limni tanlang 👇
+""",
+            reply_markup=keyboard
+        )
 
-🌐 https://sketchfab.com/search?q={text}&type=models
+    elif mode == "texture":
+
+        image_response = client.images.generate(
+            model="gpt-image-1",
+            prompt=f"Ultra realistic seamless {text} texture, PBR material"
+        )
+
+        image_base64 = image_response.data[0].b64_json
+
+        texture_bytes = base64.b64decode(image_base64)
+
+        texture_path = f"{text}.png"
+
+        with open(texture_path, "wb") as f:
+            f.write(texture_bytes)
+
+        await message.answer_photo(
+            photo=open(texture_path, "rb"),
+            caption=f"🎨 Texture Created: {text}"
+        )
+
+# =========================
+# CALLBACKS
+# =========================
+
+@dp.callback_query()
+async def callbacks(callback: CallbackQuery):
+
+    data = callback.data
+
+    # =========================
+    # PRO MODELS
+    # =========================
+
+    if data.startswith("pro_"):
+
+        query = data.replace("pro_", "")
+
+        text = f"""
+📦 PRO MODELS
+
+🌐 https://3ddd.ru/search?query={query}
+
+🌐 https://greatcatalog.net/?s={query}
+
+🌐 https://www.turbosquid.com/Search/3D-Models/{query}
+
+🌐 https://www.cgtrader.com/3d-models?keywords={query}
+
+🌐 https://cgmood.com/search/{query}
+
+🌐 https://sketchfab.com/search?q={query}&type=models
 """
+
+        await callback.message.answer(text)
+
+    # =========================
+    # FREE MODELS
+    # =========================
+
+    elif data.startswith("free_"):
+
+        query = data.replace("free_", "")
+
+        await callback.message.answer(
+            "🔎 Telegram kanallardan qidirilmoqda..."
         )
 
-        telegram_results = await telegram_search(
-            text
-        )
+        telegram_results = await telegram_search(query)
 
         if telegram_results:
 
-            await message.answer(
-                "📦 FREE MODELS TOPILDI"
-            )
-
-            for result in telegram_results[:3]:
+            for result in telegram_results[:5]:
 
                 await bot.forward_message(
-                    chat_id=message.chat.id,
+                    chat_id=callback.message.chat.id,
                     from_chat_id=result.chat_id,
                     message_id=result.id
                 )
 
         else:
 
-            await message.answer(
+            await callback.message.answer(
                 "❌ Telegramda model topilmadi"
             )
-
-    elif mode == "texture":
-
-        image_response = client.images.generate(
-            model="gpt-image-1",
-            prompt=f"Ultra realistic seamless {text} texture, PBR material, high quality"
-        )
-
-        texture_url = image_response.data[0].url
-
-        await message.answer(
-            f"""
-🎨 AI TEXTURE CREATED
-
-🖼 {texture_url}
-"""
-        )
 
 # =========================
 # MAIN
