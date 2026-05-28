@@ -10,10 +10,10 @@ from aiogram.filters import CommandStart
 from telethon import TelegramClient
 from openai import OpenAI
 
-    import asyncio
-    import logging
-    import os
-    import base64
+import asyncio
+import logging
+import os
+import base64
 
     # =========================
 
