@@ -1,3 +1,4 @@
+```python
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (
     Message,
@@ -5,8 +6,7 @@ from aiogram.types import (
     KeyboardButton,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    WebAppInfo,
-    FSInputFile
+    WebAppInfo
 )
 from aiogram.filters import CommandStart
 
@@ -15,6 +15,7 @@ from openai import OpenAI
 import asyncio
 import logging
 import os
+import base64
 
 # =========================
 # TOKENS
@@ -230,8 +231,6 @@ async def payment_handler(message: Message):
 
 1 Oy — 34.999 so'm
 3 Oy — 95.000 so'm
-
-👇 To'lov tugmasini bosing
 """,
 
         "ru": """
@@ -239,8 +238,6 @@ async def payment_handler(message: Message):
 
 1 Месяц — 34.999 сум
 3 Месяца — 95.000 сум
-
-👇 Нажмите кнопку оплаты
 """,
 
         "en": """
@@ -248,8 +245,6 @@ async def payment_handler(message: Message):
 
 1 Month — 34.999 UZS
 3 Months — 95.000 UZS
-
-👇 Press payment button
 """
     }
 
@@ -278,14 +273,13 @@ async def payment_handler(message: Message):
     )
 
 # =========================
-# FIND MODELS
+# MODES
 # =========================
 
 @dp.message(F.text.in_(["🔎 Model Izlash", "🔎 Поиск Моделей", "🔎 Find Models"]))
-async def find_models(message: Message):
+async def model_mode(message: Message):
 
     user_id = message.from_user.id
-    lang = user_languages.get(user_id, "uz")
 
     user_modes[user_id] = "model"
 
@@ -298,23 +292,14 @@ async def find_models(message: Message):
 
     user_stats[user_id]["models"] += 1
 
-    texts = {
-        "uz": "📸 Model rasmini yuboring yoki nom yozing",
-        "ru": "📸 Отправьте фото модели или название",
-        "en": "📸 Send model image or write name"
-    }
-
-    await message.answer(texts[lang])
-
-# =========================
-# RENDER FEEDBACK
-# =========================
+    await message.answer(
+        "📸 Model rasmini yuboring yoki model nomini yozing"
+    )
 
 @dp.message(F.text.in_(["📸 Render Feedback", "📸 Анализ Рендера"]))
-async def render_feedback(message: Message):
+async def render_mode(message: Message):
 
     user_id = message.from_user.id
-    lang = user_languages.get(user_id, "uz")
 
     user_modes[user_id] = "render"
 
@@ -327,23 +312,14 @@ async def render_feedback(message: Message):
 
     user_stats[user_id]["renders"] += 1
 
-    texts = {
-        "uz": "📸 Render rasmini yuboring",
-        "ru": "📸 Отправьте render изображение",
-        "en": "📸 Send render image"
-    }
-
-    await message.answer(texts[lang])
-
-# =========================
-# MODEL FEEDBACK
-# =========================
+    await message.answer(
+        "📸 Render rasmini yuboring"
+    )
 
 @dp.message(F.text.in_(["🧠 Model Feedback", "🧠 Feedback Модели"]))
-async def model_feedback(message: Message):
+async def feedback_mode(message: Message):
 
     user_id = message.from_user.id
-    lang = user_languages.get(user_id, "uz")
 
     user_modes[user_id] = "feedback"
 
@@ -356,23 +332,14 @@ async def model_feedback(message: Message):
 
     user_stats[user_id]["feedbacks"] += 1
 
-    texts = {
-        "uz": "🧠 Model screenshot yuboring",
-        "ru": "🧠 Отправьте screenshot модели",
-        "en": "🧠 Send model screenshot"
-    }
-
-    await message.answer(texts[lang])
-
-# =========================
-# TEXTURE
-# =========================
+    await message.answer(
+        "🧠 Model screenshot yuboring"
+    )
 
 @dp.message(F.text.in_(["🎨 Texture Yaratish", "🎨 Создать Текстуру", "🎨 Create Texture"]))
-async def create_texture(message: Message):
+async def texture_mode(message: Message):
 
     user_id = message.from_user.id
-    lang = user_languages.get(user_id, "uz")
 
     user_modes[user_id] = "texture"
 
@@ -385,13 +352,9 @@ async def create_texture(message: Message):
 
     user_stats[user_id]["textures"] += 1
 
-    texts = {
-        "uz": "🎨 Texture rasmini yuboring",
-        "ru": "🎨 Отправьте texture изображение",
-        "en": "🎨 Send texture image"
-    }
-
-    await message.answer(texts[lang])
+    await message.answer(
+        "🎨 Texture rasmini yuboring"
+    )
 
 # =========================
 # PHOTO AI SYSTEM
@@ -418,29 +381,87 @@ async def image_handler(message: Message):
 
     await message.answer("🤖 AI analiz qilmoqda...")
 
+    with open(image_path, "rb") as image_file:
+        base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+
+    # =========================
+    # MODEL SEARCH
+    # =========================
+
     if mode == "model":
 
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "What 3D object is this? Answer very short only."
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=30
+        )
+
+        detected_model = response.choices[0].message.content
+
         await message.answer(
-            """
+            f"""
+🤖 AI DETECTED:
+
+{detected_model}
+
 🔎 AI MODEL SEARCH RESULTS
 
 💎 PRO MODELS
+━━━━━━━━━━━━━━━
 
-🌐 https://3ddd.ru
-🌐 https://greatcatalog.net
-🌐 https://www.turbosquid.com
-🌐 https://www.cgtrader.com
-🌐 https://cgmood.com
-🌐 https://sketchfab.com
+🌐 https://3ddd.ru/search?query={detected_model}
+
+🌐 https://greatcatalog.net/?s={detected_model}
+
+🌐 https://www.turbosquid.com/Search/3D-Models/{detected_model}
+
+🌐 https://www.cgtrader.com/3d-models?keywords={detected_model}
+
+🌐 https://cgmood.com/search/{detected_model}
+
+🌐 https://sketchfab.com/search?q={detected_model}&type=models
+
 
 🆓 FREE MODELS
+━━━━━━━━━━━━━━━
 
-🌐 https://t.me/free3dsky
-🌐 https://t.me/Free3dmodels
-🌐 https://t.me/free_3dsky
-🌐 https://t.me/FREE_3DSMAX_MODELS
+🌐 https://t.me/s/free3dsky?q={detected_model}
+
+🌐 https://t.me/s/Free3dmodels?q={detected_model}
+
+🌐 https://t.me/s/free_3dsky?q={detected_model}
+
+🌐 https://t.me/s/FREE_3DSMAX_MODELS?q={detected_model}
+
+🌐 https://t.me/s/models_for_3dmax?q={detected_model}
+
+🌐 https://t.me/s/model_3dsmax?q={detected_model}
+
+🌐 https://t.me/s/CG_Game_Models?q={detected_model}
+
+🌐 https://t.me/s/arxitek03?q={detected_model}
 """
         )
+
+    # =========================
+    # RENDER FEEDBACK
+    # =========================
 
     elif mode == "render":
 
@@ -455,6 +476,10 @@ async def image_handler(message: Message):
 """
         )
 
+    # =========================
+    # MODEL FEEDBACK
+    # =========================
+
     elif mode == "feedback":
 
         await message.answer(
@@ -467,21 +492,46 @@ async def image_handler(message: Message):
 """
         )
 
+    # =========================
+    # TEXTURE SEARCH
+    # =========================
+
     elif mode == "texture":
 
-        await message.answer(
-            """
-🎨 TEXTURE ANALYZE
-
-✅ Wood texture detected
-✅ Seamless texture tavsiya qilinadi
-"""
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "What texture or material is this? Answer short only."
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=30
         )
 
-    else:
+        detected_texture = response.choices[0].message.content
 
         await message.answer(
-            "❗ Avval bo'lim tanlang"
+            f"""
+🎨 AI TEXTURE DETECTED:
+
+{detected_texture}
+
+🌐 https://polyhaven.com/textures?q={detected_texture}
+
+🌐 https://ambientcg.com/list?search={detected_texture}
+"""
         )
 
 # =========================
@@ -491,42 +541,15 @@ async def image_handler(message: Message):
 @dp.message(F.text)
 async def text_search(message: Message):
 
-    buttons = [
-        "📊 Statistika",
-        "📊 Statistics",
-        "📊 Статистика",
-        "💳 To'lov",
-        "💳 Payment",
-        "💳 Оплата",
-        "🌍 Tilni O'zgartirish",
-        "🌍 Change Language",
-        "🌍 Сменить Язык",
-        "🔎 Model Izlash",
-        "🔎 Поиск Моделей",
-        "🔎 Find Models",
-        "📸 Render Feedback",
-        "📸 Анализ Рендера",
-        "🧠 Model Feedback",
-        "🧠 Feedback Модели",
-        "🎨 Texture Yaratish",
-        "🎨 Создать Текстуру",
-        "🎨 Create Texture"
-    ]
-
-    if message.text in buttons:
-        return
-
+    text = message.text
     user_id = message.from_user.id
     mode = user_modes.get(user_id)
-    text = message.text
 
     if mode == "model":
 
         await message.answer(
             f"""
-🔎 AI MODEL SEARCH
-
-💎 PRO MODELS
+🔎 AI MODEL SEARCH RESULTS
 
 🌐 https://3ddd.ru/search?query={text}
 
@@ -539,25 +562,6 @@ async def text_search(message: Message):
 🌐 https://cgmood.com/search/{text}
 
 🌐 https://sketchfab.com/search?q={text}&type=models
-
-
-🆓 FREE MODELS
-
-🌐 https://t.me/s/free3dsky?q={text}
-
-🌐 https://t.me/s/Free3dmodels?q={text}
-
-🌐 https://t.me/s/free_3dsky?q={text}
-
-🌐 https://t.me/s/FREE_3DSMAX_MODELS?q={text}
-
-🌐 https://t.me/s/models_for_3dmax?q={text}
-
-🌐 https://t.me/s/model_3dsmax?q={text}
-
-🌐 https://t.me/s/CG_Game_Models?q={text}
-
-🌐 https://t.me/s/arxitek03?q={text}
 """
         )
 
@@ -577,11 +581,10 @@ async def text_search(message: Message):
 # STATISTICS
 # =========================
 
-@dp.message(F.text.in_(["📊 Statistika", "📊 Статистика", "📊 Statistics"]))
+@dp.message(F.text.in_(["📊 Statistika", "📊 Statistics", "📊 Статистика"]))
 async def statistics(message: Message):
 
     user_id = message.from_user.id
-    lang = user_languages.get(user_id, "uz")
 
     user_stats.setdefault(user_id, {
         "models": 0,
@@ -592,37 +595,16 @@ async def statistics(message: Message):
 
     stats = user_stats[user_id]
 
-    texts = {
+    await message.answer(
+        f"""
+📊 YOUR STATISTICS
 
-        "uz": f"""
-📊 Sizning Statistikangiz
-
-🔎 Model qidirish: {stats['models']}
+🔎 Model search: {stats['models']}
 📸 Render feedback: {stats['renders']}
 🧠 Model feedback: {stats['feedbacks']}
-🎨 Texture yaratish: {stats['textures']}
-""",
-
-        "ru": f"""
-📊 Ваша Статистика
-
-🔎 Поиск моделей: {stats['models']}
-📸 Render feedback: {stats['renders']}
-🧠 Feedback модели: {stats['feedbacks']}
-🎨 Создание текстур: {stats['textures']}
-""",
-
-        "en": f"""
-📊 Your Statistics
-
-🔎 Model searches: {stats['models']}
-📸 Render feedback: {stats['renders']}
-🧠 Model feedback: {stats['feedbacks']}
-🎨 Texture creation: {stats['textures']}
+🎨 Texture search: {stats['textures']}
 """
-    }
-
-    await message.answer(texts[lang])
+    )
 
 # =========================
 # MAIN
@@ -636,4 +618,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    
+```
