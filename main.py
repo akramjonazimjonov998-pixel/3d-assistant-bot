@@ -112,35 +112,35 @@ async def model_mode(message: Message):
 @dp.message(F.text == "📸 Render Feedback")
 async def render_mode(message: Message):
 
-```
+
 user_modes[message.from_user.id] = "render"
 
 await message.answer(
     "📸 Render rasmini yuboring"
 )
-```
+
 
 @dp.message(F.text == "🧠 Model Feedback")
 async def feedback_mode(message: Message):
 
-```
+
 user_modes[message.from_user.id] = "feedback"
 
 await message.answer(
     "🧠 Model screenshot yuboring"
 )
-```
+
 
 @dp.message(F.text == "🎨 Texture Yaratish")
 async def texture_mode(message: Message):
 
-```
+
 user_modes[message.from_user.id] = "texture"
 
 await message.answer(
     "🎨 Texture rasmi yoki nom yuboring"
 )
-```
+
 
 # =========================
 
@@ -150,7 +150,7 @@ await message.answer(
 
 async def telegram_search(query):
 
-```
+
 results = []
 
 for channel in FREE_CHANNELS:
@@ -172,7 +172,7 @@ for channel in FREE_CHANNELS:
         pass
 
 return results
-```
+
 
 # =========================
 
@@ -183,7 +183,7 @@ return results
 @dp.message(F.photo)
 async def image_handler(message: Message):
 
-```
+
 user_id = message.from_user.id
 
 mode = user_modes.get(user_id)
@@ -277,7 +277,7 @@ Kerakli bo‘limni tanlang 👇
 reply_markup=keyboard
 )
 
-```
+
 # =========================
 # RENDER FEEDBACK
 # =========================
@@ -318,7 +318,7 @@ elif mode == "render":
 """
 )
 
-```
+
 # =========================
 # MODEL FEEDBACK
 # =========================
@@ -359,7 +359,7 @@ elif mode == "feedback":
 """
 )
 
-```
+
 # =========================
 # TEXTURE GENERATOR
 # =========================
@@ -408,7 +408,7 @@ elif mode == "texture":
         photo=open(texture_path, "rb"),
         caption=f"🎨 AI Texture: {detected_texture}"
     )
-```
+
 
 # =========================
 
@@ -419,7 +419,7 @@ elif mode == "texture":
 @dp.message(F.text)
 async def text_search(message: Message):
 
-```
+
 text = message.text.lower().strip()
 
 user_id = message.from_user.id
@@ -458,7 +458,7 @@ Kerakli bo‘limni tanlang 👇
 reply_markup=keyboard
 )
 
-```
+
 elif mode == "texture":
 
     image_response = client.images.generate(
@@ -479,7 +479,7 @@ elif mode == "texture":
         photo=open(texture_path, "rb"),
         caption=f"🎨 Texture Created: {text}"
     )
-```
+
 
 # =========================
 
@@ -490,7 +490,7 @@ elif mode == "texture":
 @dp.callback_query()
 async def callbacks(callback: CallbackQuery):
 
-```
+
 data = callback.data
 
 # =========================
@@ -519,7 +519,7 @@ if data.startswith("pro_"):
 🌐 https://sketchfab.com/search?q={query}&type=models
 """
 
-```
+
     await callback.message.answer(text)
 
 # =========================
@@ -560,7 +560,7 @@ elif data.startswith("free_"):
         await callback.message.answer(
             "❌ Telegramda model topilmadi"
         )
-```
+
 
 # =========================
 
@@ -570,15 +570,15 @@ elif data.startswith("free_"):
 
 async def main():
 
-```
+
 logging.basicConfig(level=logging.INFO)
 
 await tg_client.start()
 
 await dp.start_polling(bot)
-```
+
 
 if **name** == "**main**":
 
-```
+
 asyncio.run(main())
