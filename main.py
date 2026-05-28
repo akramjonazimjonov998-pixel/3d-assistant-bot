@@ -103,13 +103,11 @@ async def start(message: Message):
 @dp.message(F.text == "🔎 Model Izlash")
 async def model_mode(message: Message):
 
+    user_modes[message.from_user.id] = "model"
 
-user_modes[message.from_user.id] = "model"
-
-await message.answer(
-    "📸 Rasm yuboring yoki model nomini yozing"
-)
-```
+    await message.answer(
+        "📸 Rasm yuboring yoki model nomini yozing"
+    )
 
 @dp.message(F.text == "📸 Render Feedback")
 async def render_mode(message: Message):
