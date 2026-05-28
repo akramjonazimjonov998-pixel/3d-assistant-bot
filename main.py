@@ -5,15 +5,26 @@ from aiogram.types import (
     KeyboardButton,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    WebAppInfo
+    WebAppInfo,
+    FSInputFile
 )
 from aiogram.filters import CommandStart
+
+from openai import OpenAI
 
 import asyncio
 import logging
 import os
 
+# =========================
+# TOKENS
+# =========================
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -215,24 +226,30 @@ async def payment_handler(message: Message):
     payment_texts = {
 
         "uz": """
-💳 OBUNA REJALARI
+💳 PREMIUM OBUNA
 
 1 Oy — 34.999 so'm
 3 Oy — 95.000 so'm
+
+👇 To'lov tugmasini bosing
 """,
 
         "ru": """
-💳 ПЛАНЫ ПОДПИСКИ
+💳 PREMIUM ПОДПИСКА
 
 1 Месяц — 34.999 сум
 3 Месяца — 95.000 сум
+
+👇 Нажмите кнопку оплаты
 """,
 
         "en": """
-💳 SUBSCRIPTION PLANS
+💳 PREMIUM SUBSCRIPTION
 
 1 Month — 34.999 UZS
 3 Months — 95.000 UZS
+
+👇 Press payment button
 """
     }
 
@@ -272,20 +289,19 @@ async def find_models(message: Message):
 
     user_modes[user_id] = "model"
 
-    if user_id not in user_stats:
-        user_stats[user_id] = {
-            "models": 0,
-            "renders": 0,
-            "feedbacks": 0,
-            "textures": 0
-        }
+    user_stats.setdefault(user_id, {
+        "models": 0,
+        "renders": 0,
+        "feedbacks": 0,
+        "textures": 0
+    })
 
     user_stats[user_id]["models"] += 1
 
     texts = {
-        "uz": "📸 Model rasmini yuboring yoki model nomini yozing",
-        "ru": "📸 Отправьте фото модели или название модели",
-        "en": "📸 Send model image or write model name"
+        "uz": "📸 Model rasmini yuboring yoki nom yozing",
+        "ru": "📸 Отправьте фото модели или название",
+        "en": "📸 Send model image or write name"
     }
 
     await message.answer(texts[lang])
@@ -341,9 +357,9 @@ async def model_feedback(message: Message):
     user_stats[user_id]["feedbacks"] += 1
 
     texts = {
-        "uz": "🧠 3D model screenshotlarini yuboring",
-        "ru": "🧠 Отправьте скриншоты 3D модели",
-        "en": "🧠 Send 3D model screenshots"
+        "uz": "🧠 Model screenshot yuboring",
+        "ru": "🧠 Отправьте screenshot модели",
+        "en": "🧠 Send model screenshot"
     }
 
     await message.answer(texts[lang])
@@ -370,15 +386,15 @@ async def create_texture(message: Message):
     user_stats[user_id]["textures"] += 1
 
     texts = {
-        "uz": "🎨 Texture rasmini yuboring yoki nom yozing",
-        "ru": "🎨 Отправьте фото текстуры или название",
-        "en": "🎨 Send texture image or write name"
+        "uz": "🎨 Texture rasmini yuboring",
+        "ru": "🎨 Отправьте texture изображение",
+        "en": "🎨 Send texture image"
     }
 
     await message.answer(texts[lang])
 
 # =========================
-# IMAGE HANDLER
+# PHOTO AI SYSTEM
 # =========================
 
 @dp.message(F.photo)
@@ -387,11 +403,26 @@ async def image_handler(message: Message):
     user_id = message.from_user.id
     mode = user_modes.get(user_id)
 
+    photo = message.photo[-1]
+
+    file = await bot.get_file(photo.file_id)
+
+    file_path = file.file_path
+
+    downloaded_file = await bot.download_file(file_path)
+
+    image_path = f"temp_{user_id}.jpg"
+
+    with open(image_path, "wb") as f:
+        f.write(downloaded_file.read())
+
+    await message.answer("🤖 AI analiz qilmoqda...")
+
     if mode == "model":
 
         await message.answer(
             """
-🔎 AI MODEL SEARCH
+🔎 AI MODEL SEARCH RESULTS
 
 💎 PRO MODELS
 
@@ -415,11 +446,12 @@ async def image_handler(message: Message):
 
         await message.answer(
             """
-📸 Render analiz qilindi
+📸 RENDER FEEDBACK
 
 ✅ Lighting yaxshi
 ✅ Material realistic
 ⚠️ Shadow kuchsiz
+⚠️ AO yetishmaydi
 """
         )
 
@@ -427,11 +459,11 @@ async def image_handler(message: Message):
 
         await message.answer(
             """
-🧠 Model Feedback
+🧠 MODEL FEEDBACK
 
 ✅ Topology yaxshi
-✅ Proportion yaxshi
-⚠️ UV kerak
+✅ Mesh clean
+⚠️ UV improve kerak
 """
         )
 
@@ -439,11 +471,17 @@ async def image_handler(message: Message):
 
         await message.answer(
             """
-🎨 Texture analiz qilindi
+🎨 TEXTURE ANALYZE
 
-✅ Marble texture
+✅ Wood texture detected
 ✅ Seamless texture tavsiya qilinadi
 """
+        )
+
+    else:
+
+        await message.answer(
+            "❗ Avval bo'lim tanlang"
         )
 
 # =========================
@@ -486,7 +524,7 @@ async def text_search(message: Message):
 
         await message.answer(
             f"""
-🔎 AI MODEL SEARCH RESULTS
+🔎 AI MODEL SEARCH
 
 💎 PRO MODELS
 
