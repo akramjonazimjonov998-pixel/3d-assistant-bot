@@ -1,5 +1,5 @@
-    from aiogram import Bot, Dispatcher, F
-    from aiogram.types import (
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import (
     Message,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
