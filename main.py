@@ -140,8 +140,6 @@ async def language_handler(message: Message):
             """
 🔥 3D ASSISTANT AI
 
-Yordamida:
-
 • 3D model toping
 • Render analiz qiling
 • Texture yarating
@@ -160,8 +158,6 @@ Yordamida:
             """
 🔥 3D ASSISTANT AI
 
-С помощью:
-
 • Найти 3D модели
 • Анализировать рендер
 • Создавать текстуры
@@ -179,8 +175,6 @@ Yordamida:
         await message.answer(
             """
 🔥 3D ASSISTANT AI
-
-With this bot you can:
 
 • Find 3D models
 • Analyze renders
@@ -223,37 +217,22 @@ async def payment_handler(message: Message):
         "uz": """
 💳 OBUNA REJALARI
 
-💎 Oddiy To'lov
-━━━━━━━━━━━━━━━
-
 1 Oy — 34.999 so'm
 3 Oy — 95.000 so'm
-
-👇 To'lov qilish uchun tugmani bosing
 """,
 
         "ru": """
 💳 ПЛАНЫ ПОДПИСКИ
 
-💎 Обычная оплата
-━━━━━━━━━━━━━━━
-
 1 Месяц — 34.999 сум
 3 Месяца — 95.000 сум
-
-👇 Нажмите кнопку для оплаты
 """,
 
         "en": """
 💳 SUBSCRIPTION PLANS
 
-💎 Standard Payment
-━━━━━━━━━━━━━━━
-
 1 Month — 34.999 UZS
 3 Months — 95.000 UZS
-
-👇 Press the payment button
 """
     }
 
@@ -323,20 +302,19 @@ async def render_feedback(message: Message):
 
     user_modes[user_id] = "render"
 
-    if user_id not in user_stats:
-        user_stats[user_id] = {
-            "models": 0,
-            "renders": 0,
-            "feedbacks": 0,
-            "textures": 0
-        }
+    user_stats.setdefault(user_id, {
+        "models": 0,
+        "renders": 0,
+        "feedbacks": 0,
+        "textures": 0
+    })
 
     user_stats[user_id]["renders"] += 1
 
     texts = {
         "uz": "📸 Render rasmini yuboring",
         "ru": "📸 Отправьте render изображение",
-        "en": "📸 Send your render image"
+        "en": "📸 Send render image"
     }
 
     await message.answer(texts[lang])
@@ -353,26 +331,25 @@ async def model_feedback(message: Message):
 
     user_modes[user_id] = "feedback"
 
-    if user_id not in user_stats:
-        user_stats[user_id] = {
-            "models": 0,
-            "renders": 0,
-            "feedbacks": 0,
-            "textures": 0
-        }
+    user_stats.setdefault(user_id, {
+        "models": 0,
+        "renders": 0,
+        "feedbacks": 0,
+        "textures": 0
+    })
 
     user_stats[user_id]["feedbacks"] += 1
 
     texts = {
         "uz": "🧠 3D model screenshotlarini yuboring",
         "ru": "🧠 Отправьте скриншоты 3D модели",
-        "en": "🧠 Send your 3D model screenshots"
+        "en": "🧠 Send 3D model screenshots"
     }
 
     await message.answer(texts[lang])
 
 # =========================
-# CREATE TEXTURE
+# TEXTURE
 # =========================
 
 @dp.message(F.text.in_(["🎨 Texture Yaratish", "🎨 Создать Текстуру", "🎨 Create Texture"]))
@@ -383,20 +360,19 @@ async def create_texture(message: Message):
 
     user_modes[user_id] = "texture"
 
-    if user_id not in user_stats:
-        user_stats[user_id] = {
-            "models": 0,
-            "renders": 0,
-            "feedbacks": 0,
-            "textures": 0
-        }
+    user_stats.setdefault(user_id, {
+        "models": 0,
+        "renders": 0,
+        "feedbacks": 0,
+        "textures": 0
+    })
 
     user_stats[user_id]["textures"] += 1
 
     texts = {
-        "uz": "🎨 Texture rasmini yuboring yoki texture nomini yozing",
+        "uz": "🎨 Texture rasmini yuboring yoki nom yozing",
         "ru": "🎨 Отправьте фото текстуры или название",
-        "en": "🎨 Send texture image or write texture name"
+        "en": "🎨 Send texture image or write name"
     }
 
     await message.answer(texts[lang])
@@ -409,20 +385,29 @@ async def create_texture(message: Message):
 async def image_handler(message: Message):
 
     user_id = message.from_user.id
-
     mode = user_modes.get(user_id)
 
     if mode == "model":
 
         await message.answer(
             """
-🔎 AI model qidirmoqda...
+🔎 AI MODEL SEARCH
+
+💎 PRO MODELS
 
 🌐 https://3ddd.ru
-
+🌐 https://greatcatalog.net
+🌐 https://www.turbosquid.com
+🌐 https://www.cgtrader.com
+🌐 https://cgmood.com
 🌐 https://sketchfab.com
 
-🌐 https://cgtrader.com
+🆓 FREE MODELS
+
+🌐 https://t.me/free3dsky
+🌐 https://t.me/Free3dmodels
+🌐 https://t.me/free_3dsky
+🌐 https://t.me/FREE_3DSMAX_MODELS
 """
         )
 
@@ -456,15 +441,9 @@ async def image_handler(message: Message):
             """
 🎨 Texture analiz qilindi
 
-✅ Marble texture aniqlandi
+✅ Marble texture
 ✅ Seamless texture tavsiya qilinadi
 """
-        )
-
-    else:
-
-        await message.answer(
-            "❗ Avval bo'limni tanlang"
         )
 
 # =========================
@@ -478,25 +457,19 @@ async def text_search(message: Message):
         "📊 Statistika",
         "📊 Statistics",
         "📊 Статистика",
-
         "💳 To'lov",
         "💳 Payment",
         "💳 Оплата",
-
         "🌍 Tilni O'zgartirish",
         "🌍 Change Language",
         "🌍 Сменить Язык",
-
         "🔎 Model Izlash",
         "🔎 Поиск Моделей",
         "🔎 Find Models",
-
         "📸 Render Feedback",
         "📸 Анализ Рендера",
-
         "🧠 Model Feedback",
         "🧠 Feedback Модели",
-
         "🎨 Texture Yaratish",
         "🎨 Создать Текстуру",
         "🎨 Create Texture"
@@ -506,22 +479,47 @@ async def text_search(message: Message):
         return
 
     user_id = message.from_user.id
-
     mode = user_modes.get(user_id)
-
     text = message.text
 
     if mode == "model":
 
         await message.answer(
             f"""
-🔎 MODEL SEARCH
+🔎 AI MODEL SEARCH RESULTS
+
+💎 PRO MODELS
 
 🌐 https://3ddd.ru/search?query={text}
 
-🌐 https://sketchfab.com/search?q={text}&type=models
+🌐 https://greatcatalog.net/?s={text}
+
+🌐 https://www.turbosquid.com/Search/3D-Models/{text}
 
 🌐 https://www.cgtrader.com/3d-models?keywords={text}
+
+🌐 https://cgmood.com/search/{text}
+
+🌐 https://sketchfab.com/search?q={text}&type=models
+
+
+🆓 FREE MODELS
+
+🌐 https://t.me/s/free3dsky?q={text}
+
+🌐 https://t.me/s/Free3dmodels?q={text}
+
+🌐 https://t.me/s/free_3dsky?q={text}
+
+🌐 https://t.me/s/FREE_3DSMAX_MODELS?q={text}
+
+🌐 https://t.me/s/models_for_3dmax?q={text}
+
+🌐 https://t.me/s/model_3dsmax?q={text}
+
+🌐 https://t.me/s/CG_Game_Models?q={text}
+
+🌐 https://t.me/s/arxitek03?q={text}
 """
         )
 
@@ -537,10 +535,6 @@ async def text_search(message: Message):
 """
         )
 
-    else:
-
-        return
-
 # =========================
 # STATISTICS
 # =========================
@@ -551,13 +545,12 @@ async def statistics(message: Message):
     user_id = message.from_user.id
     lang = user_languages.get(user_id, "uz")
 
-    if user_id not in user_stats:
-        user_stats[user_id] = {
-            "models": 0,
-            "renders": 0,
-            "feedbacks": 0,
-            "textures": 0
-        }
+    user_stats.setdefault(user_id, {
+        "models": 0,
+        "renders": 0,
+        "feedbacks": 0,
+        "textures": 0
+    })
 
     stats = user_stats[user_id]
 
